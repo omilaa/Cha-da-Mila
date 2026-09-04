@@ -408,6 +408,7 @@ async function carregarEscolhidos(){
 
 async function marcarEscolhido(id){
   const btn = document.querySelector('.btn-marcar[data-id="' + id + '"]');
+  const item = itens.find(it => it.id === id);
 
   if(btn){
     btn.disabled = true;
@@ -418,7 +419,7 @@ async function marcarEscolhido(id){
     await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ id, acao: 'marcar' })
+      body: JSON.stringify({ id, nome: item ? item.nome : '', acao: 'marcar' })
     });
     escolhidos[id] = true;
   }catch(e){
