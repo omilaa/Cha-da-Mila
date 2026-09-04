@@ -406,10 +406,8 @@ async function carregarEscolhidos(){
   render();
 }
 
-async function alternarEscolhido(id){
+async function marcarEscolhido(id){
   const btn = document.querySelector('.btn-marcar[data-id="' + id + '"]');
-  const jaEscolhido = !!escolhidos[id];
-  const acao = jaEscolhido ? 'desmarcar' : 'marcar';
 
   if(btn){
     btn.disabled = true;
@@ -420,9 +418,9 @@ async function alternarEscolhido(id){
     await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ id, acao })
+      body: JSON.stringify({ id, acao: 'marcar' })
     });
-    if(jaEscolhido) delete escolhidos[id]; else escolhidos[id] = true;
+    escolhidos[id] = true;
   }catch(e){
     alert('Não foi possível salvar sua escolha agora. Tente novamente.');
   }finally{
@@ -436,7 +434,7 @@ function render(){
   grid.innerHTML = '';
 
   let lista = itens.filter(it => categoriaAtual==='todas' || it.cat===categoriaAtual);
-  if(filtroAtual==='disponiveis') lista = lista.filter(it => !escolhidos[it.id]);
+  if(filtroAtual==='todos' || filtroAtual==='disponiveis') lista = lista.filter(it => !escolhidos[it.id]);
   if(filtroAtual==='escolhidos') lista = lista.filter(it => escolhidos[it.id]);
 
   const totalEscolhidos = itens.filter(it => escolhidos[it.id]).length;
@@ -457,17 +455,16 @@ function render(){
       <span class="preco">Valor a confirmar no link</span>
       <div class="acoes">
         <a class="btn-comprar" href="${it.url}" target="_blank" rel="noopener">Comprar</a>
-        <button class="btn-marcar ${escolhido ? 'marcado' : ''}" data-id="${it.id}">
-          ${escolhido ? 'Desmarcar' : 'Marcar como escolhido'}
-        </button>
-        ${escolhido ? '<div class="selo">Já escolhido 💝</div>' : ''}
+        ${escolhido
+          ? '<div class="selo">Já escolhido 💝</div>'
+          : `<button class="btn-marcar" data-id="${it.id}">Marcar como escolhido</button>`}
       </div>
     `;
     grid.appendChild(card);
   });
 
   document.querySelectorAll('.btn-marcar').forEach(btn=>{
-    btn.addEventListener('click', () => alternarEscolhido(btn.dataset.id));
+    btn.addEventListener('click', () => marcarEscolhido(btn.dataset.id));
   });
 }
 
